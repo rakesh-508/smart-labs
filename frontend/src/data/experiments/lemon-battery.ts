@@ -1,0 +1,345 @@
+/* ───────────────────────────────────────────────────────
+   Smart Lab – Lemon Battery Experiment Data
+   Complete experiment definition with materials,
+   steps, reactions, and RAG knowledge base
+   ─────────────────────────────────────────────────────── */
+
+import type { Experiment, Material, ExperimentStep, RAGDocument, ReactionStep } from '../types';
+
+// ── Materials ──────────────────────────────────────────
+const MATERIALS: Material[] = [
+  {
+    id: 'lemon',
+    name: 'Lemon',
+    emoji: '🍋',
+    category: 'organic',
+    description: 'Fresh lemon – natural source of citric acid electrolyte',
+    properties: [
+      { name: 'Weight', value: 110, unit: 'g', description: 'Average mass of a medium lemon' },
+      { name: 'Citric Acid', value: 5, unit: '%', description: 'Citric acid concentration in juice' },
+      { name: 'Juice Volume', value: 30, unit: 'mL', description: 'Extractable juice volume' },
+      { name: 'pH', value: 2.0, unit: '', description: 'Acidity level of lemon juice' },
+      { name: 'Conductivity', value: 0.38, unit: 'S/m', description: 'Electrical conductivity of juice' },
+      { name: 'Color', value: 'Yellow', unit: '', description: 'Bright yellow outer rind' },
+      { name: 'Diameter', value: 7, unit: 'cm', description: 'Approximate diameter' },
+    ],
+    color: '#FDE047',
+    secondaryColor: '#A3E635',
+    shape: 'ellipse',
+    width: 90,
+    height: 65,
+  },
+  {
+    id: 'zinc-nail',
+    name: 'Galvanized Nail (Zinc)',
+    emoji: '🔩',
+    category: 'metal',
+    description: 'Zinc-coated iron nail – acts as the anode (negative electrode)',
+    properties: [
+      { name: 'Weight', value: 8, unit: 'g', description: 'Mass of the nail' },
+      { name: 'Length', value: 6, unit: 'cm', description: 'Nail length' },
+      { name: 'Zinc Coating', value: 0.5, unit: 'mm', description: 'Thickness of zinc layer' },
+      { name: 'Standard Potential', value: -0.76, unit: 'V', description: 'Zn²⁺/Zn standard reduction potential' },
+      { name: 'Molar Mass', value: 65.38, unit: 'g/mol', description: 'Atomic mass of zinc' },
+      { name: 'Electrons Transferred', value: 2, unit: 'e⁻', description: 'Electrons lost per zinc atom' },
+      { name: 'Color', value: 'Silver-gray', unit: '', description: 'Galvanized silver appearance' },
+    ],
+    color: '#9CA3AF',
+    secondaryColor: '#6B7280',
+    shape: 'rect',
+    width: 8,
+    height: 55,
+  },
+  {
+    id: 'copper-wire',
+    name: 'Copper Wire',
+    emoji: '🔌',
+    category: 'metal',
+    description: 'Bare copper wire – acts as the cathode (positive electrode)',
+    properties: [
+      { name: 'Weight', value: 5, unit: 'g', description: 'Mass of copper wire piece' },
+      { name: 'Length', value: 8, unit: 'cm', description: 'Wire length' },
+      { name: 'Diameter', value: 1.5, unit: 'mm', description: 'Wire gauge' },
+      { name: 'Standard Potential', value: 0.34, unit: 'V', description: 'Cu²⁺/Cu standard reduction potential' },
+      { name: 'Molar Mass', value: 63.55, unit: 'g/mol', description: 'Atomic mass of copper' },
+      { name: 'Electrons Transferred', value: 2, unit: 'e⁻', description: 'Electrons gained per copper ion' },
+      { name: 'Color', value: 'Orange-brown', unit: '', description: 'Characteristic copper color' },
+      { name: 'Conductivity', value: 59600000, unit: 'S/m', description: 'Electrical conductivity' },
+    ],
+    color: '#D97706',
+    secondaryColor: '#B45309',
+    shape: 'rect',
+    width: 4,
+    height: 60,
+  },
+  {
+    id: 'led',
+    name: 'Small LED Light',
+    emoji: '💡',
+    category: 'electrical',
+    description: 'Red LED – requires ~1.8V and 20mA to glow brightly',
+    properties: [
+      { name: 'Forward Voltage', value: 1.8, unit: 'V', description: 'Minimum voltage for full brightness' },
+      { name: 'Min Voltage', value: 1.5, unit: 'V', description: 'Minimum for faint glow' },
+      { name: 'Forward Current', value: 20, unit: 'mA', description: 'Typical operating current' },
+      { name: 'Color', value: 'Red', unit: '', description: 'Emission wavelength ~620-630nm' },
+      { name: 'Max Current', value: 30, unit: 'mA', description: 'Maximum safe current' },
+    ],
+    color: '#EF4444',
+    secondaryColor: '#DC2626',
+    shape: 'custom',
+    width: 20,
+    height: 30,
+    svgPath: 'M10,0 L20,20 L15,20 L15,30 L5,30 L5,20 L0,20 Z',
+  },
+  {
+    id: 'wire-clip',
+    name: 'Connecting Wire with Clips',
+    emoji: '🔗',
+    category: 'electrical',
+    description: 'Insulated copper wire with alligator clips for circuit connections',
+    properties: [
+      { name: 'Length', value: 30, unit: 'cm', description: 'Wire length' },
+      { name: 'Resistance', value: 0.5, unit: 'Ω', description: 'Total wire resistance' },
+      { name: 'Color', value: 'Red/Black', unit: '', description: 'Color-coded insulation' },
+    ],
+    color: '#1F2937',
+    secondaryColor: '#EF4444',
+    shape: 'line',
+    width: 120,
+    height: 4,
+  },
+  {
+    id: 'knife',
+    name: 'Knife (Optional)',
+    emoji: '🔪',
+    category: 'tool',
+    description: 'Small knife to make cuts in the lemon for easier electrode insertion',
+    properties: [
+      { name: 'Use', value: 'Optional', unit: '', description: 'For making small incisions in lemon' },
+    ],
+    color: '#78716C',
+    secondaryColor: '#44403C',
+    shape: 'custom',
+    width: 15,
+    height: 50,
+  },
+];
+
+// ── Steps ──────────────────────────────────────────────
+const STEPS: ExperimentStep[] = [
+  {
+    id: 1,
+    title: 'Prepare the Lemon',
+    instructions: [
+      'Roll the lemon gently on the table with your hand.',
+      'This helps release more juice inside, improving conductivity.',
+      'You should feel the lemon become slightly softer.',
+    ],
+    requiredMaterials: ['lemon'],
+    expectedActions: ['ADD_MATERIAL:lemon', 'ROLL_LEMON'],
+    explanation: 'Rolling breaks the juice vesicles inside, releasing more citric acid. This increases electrolyte concentration from ~0.03 to ~0.035 mol/L, boosting conductivity by ~10%.',
+    completed: false,
+  },
+  {
+    id: 2,
+    title: 'Insert the Metals',
+    instructions: [
+      'Push the galvanized nail (zinc) into the lemon.',
+      'Insert the copper wire into the lemon about 2–3 cm away from the nail.',
+      'Make sure the two metals do not touch each other inside the lemon.',
+    ],
+    requiredMaterials: ['zinc-nail', 'copper-wire'],
+    expectedActions: ['ADD_MATERIAL:zinc-nail', 'ADD_MATERIAL:copper-wire', 'INSERT_INTO:zinc-nail:lemon', 'INSERT_INTO:copper-wire:lemon'],
+    explanation: 'The zinc and copper must be in contact with the acidic juice but not touching each other. They create two different half-cells. Zinc (anode) oxidizes releasing electrons, while hydrogen ions reduce at the copper (cathode).',
+    completed: false,
+  },
+  {
+    id: 3,
+    title: 'Attach the Wires',
+    instructions: [
+      'Connect one wire from the zinc nail to one terminal of the LED.',
+      'Connect another wire from the copper wire to the other terminal of the LED.',
+      'The longer LED leg (anode) connects to copper (positive), shorter leg (cathode) to zinc (negative).',
+    ],
+    requiredMaterials: ['led', 'wire-clip'],
+    expectedActions: ['ADD_MATERIAL:led', 'ADD_MATERIAL:wire-clip', 'CONNECT_WIRE:zinc-nail:led', 'CONNECT_WIRE:copper-wire:led'],
+    explanation: 'Connecting wires creates the external circuit through which electrons flow from zinc (where oxidation occurs) to copper (where reduction occurs), passing through the LED on the way.',
+    completed: false,
+  },
+  {
+    id: 4,
+    title: 'Complete the Circuit',
+    instructions: [
+      'Once all connections are made, the circuit is complete.',
+      'The chemical reaction between zinc and copper in the acidic lemon juice produces electricity.',
+      'Check all connections are secure.',
+    ],
+    requiredMaterials: [],
+    expectedActions: ['COMPLETE_CIRCUIT'],
+    explanation: 'A single lemon cell produces ~1.0-1.1V. The LED needs ~1.8V, so one lemon may only produce a very faint glow or none at all. The internal resistance of the lemon (~500Ω) also limits current.',
+    completed: false,
+  },
+  {
+    id: 5,
+    title: 'Observe the Result',
+    instructions: [
+      'The LED may glow dimly with one lemon.',
+      'If it doesn\'t glow, connect 2–3 lemons in series.',
+      'For series connection: zinc of one lemon connects to copper of the next.',
+      'This increases total voltage (each lemon adds ~1.0-1.1V).',
+    ],
+    requiredMaterials: [],
+    expectedActions: ['ADD_SERIES_CELL', 'SHOW_REACTION'],
+    explanation: '2 lemons in series ≈ 2.0-2.2V (LED glows dimly). 3 lemons ≈ 3.0-3.3V (LED glows brightly). More lemons = more voltage but current stays limited by internal resistance.',
+    completed: false,
+  },
+];
+
+// ── Reactions ──────────────────────────────────────────
+const REACTIONS: ReactionStep[] = [
+  {
+    equation: 'Zn(s) → Zn²⁺(aq) + 2e⁻',
+    description: 'At the anode (galvanized nail), zinc atoms lose 2 electrons each, becoming zinc ions that dissolve into the lemon juice. This is OXIDATION. The standard potential is E° = -0.76V.',
+    type: 'oxidation',
+    deltaG: -146.7,
+  },
+  {
+    equation: '2H⁺(aq) + 2e⁻ → H₂(g)↑',
+    description: 'At the cathode (copper wire), hydrogen ions from citric acid gain the electrons that traveled through the external circuit. Hydrogen gas bubbles form on the copper surface. This is REDUCTION.',
+    type: 'reduction',
+    deltaG: 0,
+  },
+  {
+    equation: 'Zn(s) + 2H⁺(aq) → Zn²⁺(aq) + H₂(g)↑',
+    description: 'OVERALL: Zinc metal reacts with hydrogen ions from citric acid. Zinc dissolves, hydrogen gas is released, and electrons flow through the wire — creating electric current that lights the LED. Cell voltage ≈ 1.10V.',
+    type: 'overall',
+    deltaG: -212.3,
+  },
+];
+
+// ── RAG Documents ──────────────────────────────────────
+const RAG_DOCUMENTS: RAGDocument[] = [
+  {
+    id: 'rag-overview',
+    title: 'Lemon Battery Experiment Overview',
+    content: `The lemon battery is a classic electrochemistry experiment that demonstrates how chemical energy can be converted to electrical energy. A lemon contains citric acid (C₆H₈O₇) which acts as an electrolyte — a substance that conducts electricity through the movement of ions. By inserting two different metals (zinc and copper) into the lemon, you create a galvanic cell (voltaic cell). The potential difference between zinc and copper drives electrons through an external circuit, powering a small LED. This experiment teaches fundamental concepts: oxidation-reduction (redox) reactions, electrode potentials, electrolytes, and circuit basics.`,
+    metadata: { type: 'overview', difficulty: 'beginner' },
+    tags: ['overview', 'introduction', 'electrochemistry', 'lemon', 'battery'],
+  },
+  {
+    id: 'rag-lemon-properties',
+    title: 'Lemon Physical and Chemical Properties',
+    content: `A medium lemon weighs approximately 110 grams and has a diameter of about 7 cm. The juice of a lemon contains approximately 5-6% citric acid (C₆H₈O₇) by weight, giving it a pH of approximately 2.0-2.6. The juice volume extractable from one lemon is about 30-45 mL. Key properties for the experiment: The citric acid concentration is roughly 0.03 mol/L. The electrical conductivity of lemon juice is approximately 0.38 S/m. Lemon juice also contains small amounts of ascorbic acid (vitamin C), malic acid, and various mineral ions (potassium, calcium, magnesium) which contribute to its electrolytic properties. The rind is bright yellow due to limonene and other terpenes. Rolling the lemon before use breaks internal juice vesicles, increasing available juice by 30-50% and improving conductivity.`,
+    metadata: { type: 'material', material: 'lemon' },
+    tags: ['lemon', 'citric acid', 'electrolyte', 'properties', 'pH', 'conductivity'],
+  },
+  {
+    id: 'rag-zinc-properties',
+    title: 'Zinc (Galvanized Nail) Properties',
+    content: `The galvanized nail is an iron nail coated with a thin layer of zinc. Zinc (Zn) has atomic number 30, atomic mass 65.38 g/mol, and a standard reduction potential of E° = -0.76V vs SHE (Standard Hydrogen Electrode). In the lemon battery, zinc acts as the ANODE (negative terminal). Zinc is more reactive than copper, meaning it more readily loses electrons. The oxidation half-reaction is: Zn(s) → Zn²⁺(aq) + 2e⁻. A typical galvanized nail weighs about 8 grams with a zinc coating approximately 0.5mm thick. The silver-gray appearance comes from the zinc coating. As the battery operates, the zinc slowly dissolves into the lemon juice as Zn²⁺ ions. The galvanization (zinc coating) protects the iron underneath from rusting — this same electrochemical principle is what makes the battery work.`,
+    metadata: { type: 'material', material: 'zinc' },
+    tags: ['zinc', 'galvanized', 'nail', 'anode', 'oxidation', 'electrode', 'metal'],
+  },
+  {
+    id: 'rag-copper-properties',
+    title: 'Copper Wire Properties',
+    content: `Copper (Cu) has atomic number 29, atomic mass 63.55 g/mol, and a standard reduction potential of E° = +0.34V vs SHE. In the lemon battery, copper acts as the CATHODE (positive terminal). Copper wire has excellent electrical conductivity (59.6 × 10⁶ S/m), making it ideal for both the electrode and connecting wires. The characteristic orange-brown color comes from its d-electron configuration. In this experiment, copper itself does NOT actually participate in the chemical reaction — instead, it serves as an inert surface where hydrogen ions from the citric acid gain electrons: 2H⁺(aq) + 2e⁻ → H₂(g). You may observe tiny bubbles forming on the copper wire surface — this is hydrogen gas. A typical copper wire piece weighs about 5g and is 1.5mm in diameter.`,
+    metadata: { type: 'material', material: 'copper' },
+    tags: ['copper', 'wire', 'cathode', 'reduction', 'electrode', 'metal', 'conductivity'],
+  },
+  {
+    id: 'rag-led-properties',
+    title: 'LED (Light Emitting Diode) Properties',
+    content: `An LED is a semiconductor device that emits light when current flows through it in the forward direction. A standard red LED has a forward voltage of approximately 1.8V and typical operating current of 20mA. The minimum voltage for a faint glow is about 1.5V. LEDs are polarity-sensitive: the longer leg is the anode (positive, connect to copper) and the shorter leg is the cathode (negative, connect to zinc). If connected backwards, no current flows and no light is produced. The LED has very low power consumption: P = V × I = 1.8V × 0.02A = 0.036W. Different colored LEDs have different forward voltages: Red (1.8-2.0V), Orange (2.0-2.1V), Yellow (2.1-2.2V), Green (2.0-3.5V), Blue (2.5-3.7V). Red LEDs require the least voltage, making them easiest to light with a lemon battery.`,
+    metadata: { type: 'material', material: 'led' },
+    tags: ['led', 'light', 'diode', 'voltage', 'current', 'brightness'],
+  },
+  {
+    id: 'rag-electrochemistry-basics',
+    title: 'Electrochemistry Fundamentals',
+    content: `Electrochemistry is the study of chemical reactions that produce or are driven by electricity. Key concepts: 1) OXIDATION is the loss of electrons (OIL - Oxidation Is Loss). Zinc is oxidized. 2) REDUCTION is the gain of electrons (RIG - Reduction Is Gain). Hydrogen ions are reduced. 3) ELECTROLYTE is a substance containing free ions that conducts electricity. Citric acid in lemon juice dissociates: C₆H₈O₇ ⇌ C₆H₅O₇³⁻ + 3H⁺. 4) ANODE is where oxidation occurs (zinc nail, negative terminal). 5) CATHODE is where reduction occurs (copper wire, positive terminal). 6) The CELL POTENTIAL (EMF) is calculated as E_cell = E_cathode - E_anode = 0.34 - (-0.76) = 1.10V theoretical maximum. 7) The NERNST EQUATION adjusts the standard potential for actual concentrations: E = E° - (RT/nF)ln(Q). For non-standard conditions, the actual voltage differs from the theoretical 1.10V.`,
+    metadata: { type: 'theory', topic: 'electrochemistry' },
+    tags: ['electrochemistry', 'oxidation', 'reduction', 'redox', 'electrolyte', 'anode', 'cathode', 'voltage'],
+  },
+  {
+    id: 'rag-nernst-equation',
+    title: 'Nernst Equation and Voltage Calculation',
+    content: `The Nernst equation calculates the actual electrode potential under non-standard conditions: E = E° - (RT/nF) × ln(Q), where R = 8.314 J/(mol·K) is the gas constant, T = temperature in Kelvin (298.15K at 25°C), n = number of electrons transferred (2 for both Zn and Cu), F = 96485 C/mol is the Faraday constant, Q = reaction quotient. At 25°C, this simplifies to: E = E° - (0.02569/n) × ln(Q) or E = E° - (0.05916/n) × log₁₀(Q). For the lemon battery with citric acid concentration ~0.03 mol/L: The actual cell voltage is typically 0.9-1.1V, slightly less than the theoretical 1.10V due to non-ideal conditions, internal resistance, and concentration effects. The Gibbs free energy change is ΔG = -nFE = -2 × 96485 × 1.10 = -212.3 kJ/mol, confirming the reaction is spontaneous.`,
+    metadata: { type: 'theory', topic: 'nernst' },
+    tags: ['nernst', 'equation', 'voltage', 'calculation', 'potential', 'gibbs', 'thermodynamics'],
+  },
+  {
+    id: 'rag-series-connection',
+    title: 'Series Connection of Multiple Lemons',
+    content: `When a single lemon battery (~1.0V) cannot light an LED (needs ~1.8V), multiple lemons can be connected in SERIES. In a series connection: the zinc nail of one lemon connects to the copper wire of the next lemon. Total voltage = sum of individual cell voltages. With 2 lemons: ~2.0-2.2V (LED may glow dimly). With 3 lemons: ~3.0-3.3V (LED glows brightly). Current remains limited by the weakest cell. The internal resistance of each lemon cell is approximately 500Ω, so total internal resistance increases with more cells. For 3 lemons in series: total internal resistance ≈ 1500Ω, open circuit voltage ≈ 3.3V, short circuit current ≈ 2.2mA. With LED load (100Ω equivalent): working voltage ≈ 2.1V, current ≈ 1.3mA. PARALLEL connection (all zinc together, all copper together) increases current but not voltage — useful when you need more power at the same voltage.`,
+    metadata: { type: 'theory', topic: 'circuit' },
+    tags: ['series', 'parallel', 'connection', 'multiple', 'lemons', 'voltage', 'circuit'],
+  },
+  {
+    id: 'rag-faraday-law',
+    title: "Faraday's Law and Battery Lifetime",
+    content: `Faraday's laws of electrolysis relate the amount of substance transformed to the charge passed through the circuit. First law: mass deposited/dissolved is proportional to charge (m = MIt/nF). For the lemon battery anode: if the zinc nail weighs 8g and current is 0.5mA, the theoretical runtime is: t = (m × n × F)/(M × I) = (8 × 2 × 96485)/(65.38 × 0.0005) = 47,240,000 seconds ≈ 547 days. In practice, the battery runs much shorter because: 1) The zinc coating is thin (~0.5mm) and depletes before the iron core. 2) The acid in the lemon neutralizes over time. 3) Hydrogen gas bubbles insulate the copper (polarization). 4) The lemon dries out. Practical lifetime is typically a few hours to a few days at these low currents.`,
+    metadata: { type: 'theory', topic: 'faraday' },
+    tags: ['faraday', 'law', 'lifetime', 'runtime', 'charge', 'electrolysis', 'mass'],
+  },
+  {
+    id: 'rag-step1-rolling',
+    title: 'Step 1: Why Rolling the Lemon Matters',
+    content: `Rolling the lemon on a flat surface with moderate pressure serves an important purpose. Inside a lemon, the juice is contained in small sac-like structures called juice vesicles, which are part of the endocarp (the inner fruit layer). When you roll the lemon, you mechanically rupture many of these vesicles, releasing the citric acid-rich juice into the surrounding pulp tissue. This increases the effective electrolyte volume from approximately 30mL to 45mL. The freed juice also creates better contact between the electrolyte and the electrodes when they are inserted. Measurable effects: juice volume increases by 30-50%, conductivity improves by approximately 10% (from 0.38 to 0.42 S/m), and the resulting cell voltage increases by about 5-10mV. The lemon should feel noticeably softer after rolling.`,
+    metadata: { type: 'step', step: 1 },
+    tags: ['rolling', 'prepare', 'lemon', 'juice', 'vesicles', 'conductivity', 'step1'],
+  },
+  {
+    id: 'rag-step2-insertion',
+    title: 'Step 2: Proper Metal Insertion Technique',
+    content: `Inserting the electrodes correctly is crucial. The galvanized nail (zinc anode) and copper wire (cathode) must be pushed into the lemon deep enough to be surrounded by juice (at least 2-3cm deep) but must NOT touch each other inside the lemon. If they touch, the cell is short-circuited internally and no external current flows. Optimal spacing is 2-3cm apart. The furthest distance that still works well is about 4cm. Beyond that, the internal resistance becomes too high. If the lemon rind is tough, you can use a knife to make small starting cuts. The electrodes should be stable and not wobble. More surface area in contact with juice = more current. A nail pushed in 4cm provides about 3.5cm² of zinc surface in contact with juice. The copper wire provides about 3.8cm² if inserted 4cm deep.`,
+    metadata: { type: 'step', step: 2 },
+    tags: ['insertion', 'metals', 'electrode', 'spacing', 'technique', 'step2', 'nail', 'copper'],
+  },
+  {
+    id: 'rag-step3-wiring',
+    title: 'Step 3: Proper Wire Connection',
+    content: `Connecting the external circuit correctly is essential. Use insulated copper wires with alligator clips for reliable connections. Wire 1: Clip one end to the zinc nail (anode, negative) and the other end to the SHORT leg of the LED (cathode of LED = negative terminal). Wire 2: Clip one end to the copper wire electrode (cathode, positive) and the other end to the LONG leg of the LED (anode of LED = positive terminal). If the LED doesn't light when connections seem correct, try reversing the LED — it only conducts in one direction. Total external resistance is typically about 100Ω (LED forward resistance + wire resistance). Good connections are crucial: loose clips add resistance and reduce current.`,
+    metadata: { type: 'step', step: 3 },
+    tags: ['wiring', 'connection', 'clips', 'LED', 'circuit', 'polarity', 'step3'],
+  },
+  {
+    id: 'rag-troubleshooting',
+    title: 'Troubleshooting the Lemon Battery',
+    content: `Common issues and solutions: 1) LED doesn't glow: Single lemon only produces ~1.0V, below LED threshold of ~1.5V. Solution: Add 2-3 lemons in series. 2) Very dim glow: Check connections are tight. Clean electrode surfaces with sandpaper. Use a fresher lemon. Try a red LED (lowest voltage requirement). 3) Short circuit: Make sure zinc and copper don't touch inside lemon. Check for stray wire contact. 4) Quick fade: Hydrogen bubbles accumulating on copper (polarization). Gently shake the lemon or use a different lemon. 5) No voltage measured: Check multimeter connections. Ensure electrodes are actually in the juice, not just the rind. 6) Inconsistent results: Lemon freshness matters a lot. Temperature affects reaction rate (warmer = higher voltage). The zinc coating thickness varies between nails.`,
+    metadata: { type: 'guide', topic: 'troubleshooting' },
+    tags: ['troubleshooting', 'problems', 'solutions', 'debug', 'fix', 'help'],
+  },
+  {
+    id: 'rag-alternative-materials',
+    title: 'Alternative Materials and Variations',
+    content: `The lemon battery concept works with many variations. Alternative fruits/vegetables: Potato (pH 5.5, lower voltage ~0.8V), Orange (pH 3.5, ~0.9V), Grapefruit (pH 3.0, ~1.0V), Tomato (pH 4.0, ~0.85V), Apple (pH 3.5, ~0.9V), Vinegar (pH 2.4, ~1.0V). Alternative anode metals (instead of zinc): Aluminum (E° = -1.66V, higher voltage but forms oxide layer), Magnesium (E° = -2.37V, highest voltage ~2.0V per cell), Iron (E° = -0.44V, lower voltage ~0.78V). Alternative cathode materials: Carbon/graphite rod (from pencil, E° ≈ 0.207V), Silver coin (E° = 0.80V). The most powerful fruit battery uses magnesium + copper in lemon: theoretical ~2.7V per cell — one cell can dimly light a red LED!`,
+    metadata: { type: 'guide', topic: 'alternatives' },
+    tags: ['alternative', 'materials', 'potato', 'variations', 'fruits', 'metals', 'magnesium'],
+  },
+  {
+    id: 'rag-safety',
+    title: 'Safety Guidelines',
+    content: `Safety precautions for the lemon battery experiment: 1) Do NOT eat the lemon after the experiment — metal ions (especially zinc) have leached into the juice. 2) Handle the knife carefully if used to make cuts. Young children should have adult supervision. 3) The currents and voltages are very low (milliamps, ~1V) and completely safe to touch. 4) Wash hands after handling galvanized nails — they may have industrial coatings. 5) Dispose of used lemons in regular waste — the small amount of zinc is not hazardous. 6) Keep small components (LED, clips) away from very young children (choking hazard). 7) If using multiple cells, total voltage remains well below any dangerous level. 8) Wear safety goggles as standard lab practice — lemon juice can sting if it gets in eyes.`,
+    metadata: { type: 'safety' },
+    tags: ['safety', 'precautions', 'guidelines', 'warning', 'hazard'],
+  },
+];
+
+// ── Full Experiment Definition ─────────────────────────
+export const LEMON_BATTERY_EXPERIMENT: Experiment = {
+  id: 'lemon-battery',
+  name: 'Lemon Battery',
+  emoji: '🍋⚡',
+  description: 'Build an electrochemical cell using a lemon, zinc nail, and copper wire to light an LED — learn about oxidation, reduction, and electric circuits!',
+  category: 'Electrochemistry',
+  difficulty: 'beginner',
+  materials: MATERIALS,
+  steps: STEPS,
+  reactions: REACTIONS,
+  ragDocuments: RAG_DOCUMENTS,
+  scientificBackground: `This experiment demonstrates a galvanic (voltaic) cell — a device that converts chemical energy into electrical energy through spontaneous redox reactions. The zinc anode undergoes oxidation (Zn → Zn²⁺ + 2e⁻) while hydrogen ions at the copper cathode undergo reduction (2H⁺ + 2e⁻ → H₂). The electromotive force (EMF) is determined by the difference in standard electrode potentials: E°cell = E°cathode - E°anode = 0.00 - (-0.76) = 0.76V (using H₂/H⁺ at copper) or theoretically up to 1.10V considering the Cu²⁺/Cu system. This is the same principle behind commercial batteries like alkaline (Zn-MnO₂) and even lithium-ion cells.`,
+};
+
+export default LEMON_BATTERY_EXPERIMENT;
